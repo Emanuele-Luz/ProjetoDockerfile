@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRUD Usuários</title>
+<style>
+:root {
+    --bg: #f1f5f9;
+    --bg-pattern: #e2e8f0;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(15, 23, 42, 0.06);
+    --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image:
+        radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.06) 0%, transparent 40%);
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.site-header {
+    margin-bottom: 2rem;
+}
+
+.site-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.5rem, 4vw, 1.85rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.site-header .subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    margin: 0 0 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+#form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: flex-end;
+}
+
+#form .field-group {
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+#form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+#form input[type="text"],
+#form input[type="email"] {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font: inherit;
+    color: var(--text);
+    background: #f8fafc;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+#form input:hover {
+    background: #fff;
+}
+
+#form input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+#form .actions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1.35rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.65rem 1.15rem;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    background: #f8fafc;
+    color: var(--text);
+}
+
+.btn-icon {
+    padding: 0.45rem 0.6rem;
+    min-width: 2.25rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.btn-edit {
+    background: #eff6ff;
+    color: var(--primary);
+}
+
+.btn-edit:hover {
+    background: #dbeafe;
+}
+
+.btn-delete {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.data-table thead {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.data-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.data-table .col-id {
+    width: 4rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table .col-actions {
+    width: 7rem;
+    white-space: nowrap;
+}
+
+.data-table .col-actions .btn {
+    margin-right: 0.35rem;
+}
+
+.data-table .col-actions .btn:last-child {
+    margin-right: 0;
+}
+
+.data-table .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem 1rem !important;
+    font-style: italic;
+}
+
+@media (max-width: 540px) {
+    #form .actions {
+        width: 100%;
+        padding-top: 0;
+    }
+
+    #form .actions .btn-primary {
+        flex: 1;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header class="site-header">
+    <h1>Usuários</h1>
+    <p class="subtitle">Cadastre, edite e remova registros. Os dados são salvos no servidor.</p>
+</header>
+
+<section class="card" aria-labelledby="titulo-cadastro">
+    <h2 class="card-title" id="titulo-cadastro">Cadastro</h2>
+    <form id="form">
+        <input type="hidden" id="id">
+        <div class="field-group">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" placeholder="Nome completo" required autocomplete="name">
+        </div>
+        <div class="field-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="email@exemplo.com" required autocomplete="email">
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</section>
+
+<section class="card" aria-labelledby="titulo-lista">
+    <h2 class="card-title" id="titulo-lista">Usuários cadastrados</h2>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-id" scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">E-mail</th>
+                    <th class="col-actions" scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="lista"></tbody>
+        </table>
+    </div>
+</section>
+
+</div>
+
+<script>
+const API = "api.php";
+
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/</g, "&lt;");
+}
+
+document.getElementById("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("id").value;
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+
+    await fetch(API, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id, nome, email})
+    });
+
+    limpar();
+    carregar();
+});
+
+document.getElementById("lista").addEventListener("click", (e) => {
+    const editBtn = e.target.closest(".btn-row-edit");
+    if (editBtn) {
+        editar(editBtn.dataset.id, editBtn.dataset.nome, editBtn.dataset.email);
+        return;
+    }
+    const delBtn = e.target.closest(".btn-row-delete");
+    if (delBtn) {
+        deletar(delBtn.dataset.id);
+    }
+});
+
+async function carregar() {
+    const res = await fetch(API);
+    const dados = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    if (!Array.isArray(dados)) {
+        console.error("Resposta da API inválida:", dados);
+        return;
+    }
+
+    if (dados.length === 0) {
+        lista.innerHTML = `<tr><td class="empty" colspan="4">Nenhum usuário cadastrado ainda.</td></tr>`;
+        return;
+    }
+
+    dados.forEach(u => {
+        const nomeAttr = escapeAttr(u.nome);
+        const emailAttr = escapeAttr(u.email);
+        lista.innerHTML += `
+        <tr>
+            <td class="col-id">${escapeHtml(u.id)}</td>
+            <td>${escapeHtml(u.nome)}</td>
+            <td>${escapeHtml(u.email)}</td>
+            <td class="col-actions">
+                <button type="button" class="btn btn-icon btn-edit btn-row-edit" data-id="${escapeHtml(u.id)}" data-nome="${nomeAttr}" data-email="${emailAttr}" title="Editar">✏️</button>
+                <button type="button" class="btn btn-icon btn-delete btn-row-delete" data-id="${escapeHtml(u.id)}" title="Excluir">🗑️</button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function editar(id, nome, email) {
+    document.getElementById("id").value = id;
+    document.getElementById("nome").value = nome;
+    document.getElementById("email").value = email;
+}
+
+async function deletar(id) {
+    await fetch(API + "?delete=" + id);
+    carregar();
+}
+
+function limpar() {
+    document.getElementById("id").value = "";
+    document.getElementById("form").reset();
+}
+
+carregar();
+</script>
+
+</body>
+</html>
